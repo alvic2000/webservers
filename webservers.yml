@@ -1,0 +1,48 @@
+---
+- name: Configure webserver with nginx and tls
+  hosts: webservers
+  become: True
+  vars:
+    key_file: /etc/nginx/ssl/nginx.key
+    cert_file: /etc/nginx/ssl/nginx.crt
+    conf_file: /etc/nginx/nginx.conf
+    server_name: localhost
+  tasks:
+    - name: Install nginx
+      yum: 
+        name: nginx
+        
+    - name: Create directory for ssl certificates
+      file:
+        path: /etc/nginx/ssl
+        state: directory
+      
+    - name: Copy TLS key
+      copy:
+        src: files/webservers/nginx.key
+        dest: "{{ key_file }}"
+      notify: restart nginx
+    
+    - name: Copy TLS certificate
+      copy:
+        src: files/webservers/nginx.crt
+        dest: "{{ cert_file }}"
+      notify: restart nginx
+    
+    - name: Install config file
+      template:
+        src: templates/webservers/nginx.conf.j2
+        dest: "{{ conf_file }}"
+      notify: restart nginx
+      
+    - name: copy index.html
+      template:
+        src: templates/webservers/index.html.j2
+        dest: /usr/share/nginx/html/index.html
+        mode: 0644
+    
+  handlers:
+    - name: restart nginx
+      service: 
+        name: nginx
+        state: restarted
