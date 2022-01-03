@@ -19,25 +19,25 @@
       
     - name: Copy TLS key
       copy:
-        src: files/webservers/nginx.key
+        src: nginx.key
         dest: "{{ key_file }}"
       notify: restart nginx
     
     - name: Copy TLS certificate
       copy:
-        src: files/webservers/nginx.crt
+        src: nginx.crt
         dest: "{{ cert_file }}"
       notify: restart nginx
     
     - name: Install config file
       template:
-        src: templates/webservers/nginx.conf.j2
+        src: nginx.conf.j2
         dest: "{{ conf_file }}"
       notify: restart nginx
       
     - name: copy index.html
       template:
-        src: templates/webservers/index.html.j2
+        src: index.html.j2
         dest: /usr/share/nginx/html/index.html
         mode: 0644
     
